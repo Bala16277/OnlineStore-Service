@@ -17,6 +17,30 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 				HttpStatus.NOT_FOUND.value(), request.getDescription(false));
 		return new ResponseEntity<>(errorResponse, HttpStatus.NOT_FOUND);
 	}
+	
+	@ExceptionHandler(UserNotFoundException.class)
+	public ResponseEntity<ErrorResponse> globalExceptionHandler(UserNotFoundException userNotFoundException,
+			WebRequest request) {
+		ErrorResponse errorResponse = new ErrorResponse(userNotFoundException.getMessage(),
+				HttpStatus.NOT_FOUND.value(), request.getDescription(false));
+		return new ResponseEntity<>(errorResponse, HttpStatus.NOT_FOUND);
+	}
+	
+	@ExceptionHandler(InvalidOrderException.class)
+	public ResponseEntity<ErrorResponse> globalExceptionHandler(InvalidOrderException invalidOrderException,
+			WebRequest request) {
+		ErrorResponse errorResponse = new ErrorResponse(invalidOrderException.getMessage(),
+				HttpStatus.NOT_FOUND.value(), request.getDescription(false));
+		return new ResponseEntity<>(errorResponse, HttpStatus.NOT_FOUND);
+	}
+	
+	@ExceptionHandler(InvalidReviewerException.class)
+	public ResponseEntity<ErrorResponse> globalExceptionHandler(InvalidReviewerException invalidReviewerException,
+			WebRequest request) {
+		ErrorResponse errorResponse = new ErrorResponse(invalidReviewerException.getMessage(),
+				HttpStatus.NOT_FOUND.value(), request.getDescription(false));
+		return new ResponseEntity<>(errorResponse, HttpStatus.NOT_FOUND);
+	}
 
 	@ExceptionHandler(NullPointerException.class)
 	public ResponseEntity<ErrorResponse> globalExceptionHandler(NullPointerException nullPointerException,

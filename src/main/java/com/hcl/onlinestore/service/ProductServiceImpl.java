@@ -15,42 +15,49 @@ import com.hcl.onlinestore.config.ApplicationConstants;
 import com.hcl.onlinestore.dto.ProductDto;
 import com.hcl.onlinestore.dto.ProductResponseDto;
 import com.hcl.onlinestore.entity.Product;
+import com.hcl.onlinestore.entity.User;
 import com.hcl.onlinestore.exception.ProductNotFoundException;
+import com.hcl.onlinestore.exception.UserNotFoundException;
 import com.hcl.onlinestore.repository.ProductRepository;
+import com.hcl.onlinestore.repository.UserRepository;
 
 @Service
 public class ProductServiceImpl implements ProductService {
-	
-	
+
 	@Autowired
 	ProductRepository productRepository;
-	
-	public ProductResponseDto getProductsByProuctName(String productName) throws ProductNotFoundException {
+
+	@Autowired
+	UserRepository userRepository;
+
+	public ProductResponseDto getProductsByProuctName(Integer userId, String productName)
+			throws ProductNotFoundException, UserNotFoundException {
 		ProductResponseDto productResponseDto = new ProductResponseDto();
 		List<ProductDto> productDtos = new ArrayList<>();
 		List<Product> productList = new ArrayList<>();
 		Optional<List<Product>> products = productRepository.findByProductNameContains(productName);
-		if(products.isPresent()) {
-			productList = products.get();
-			for(Product product: productList) {
-				ProductDto productDto = new ProductDto();
-				BeanUtils.copyProperties(product, productDto);
-				productDtos.add(productDto);
+		Optional<User> users = userRepository.findByUserId(userId);
+		if (users.isPresent()) {
+			if (products.isPresent()) {
+				productList = products.get();
+				for (Product product : productList) {
+					ProductDto productDto = new ProductDto();
+					BeanUtils.copyProperties(product, productDto);
+					productDtos.add(productDto);
+				}
+				List<ProductDto> productDtos1 = productDtos.stream()
+						.sorted(Comparator.comparing(ProductDto::getProductRating).reversed())
+						.collect(Collectors.toList());
+
+				productResponseDto.setStatusMessage(ApplicationConstants.PRODUCT_LIST);
+				productResponseDto.setStatusCode(HttpStatus.OK.value());
+				productResponseDto.setProductDto(productDtos1);
+				return productResponseDto;
+			} else {
+				throw new ProductNotFoundException(ApplicationConstants.PRODUCT_NOT_FOUND);
 			}
-			List<ProductDto> productDtos1 = 
-			productDtos
-				.stream()
-				.sorted(Comparator.comparing(ProductDto::getProductRating).reversed())
-				.collect(Collectors.toList());
-			productDtos
-				.stream()
-				.forEach(System.out::println);
-			productResponseDto.setStatusMessage(ApplicationConstants.PRODUCT_LIST);
-			productResponseDto.setStatusCode(HttpStatus.OK.value());
-			productResponseDto.setProductDto(productDtos1);
-			return productResponseDto;
 		} else {
-			throw new ProductNotFoundException(ApplicationConstants.PRODUCT_NOT_FOUND);
+			throw new UserNotFoundException(ApplicationConstants.USER_NOT_FOUND);
 		}
 	}
 
