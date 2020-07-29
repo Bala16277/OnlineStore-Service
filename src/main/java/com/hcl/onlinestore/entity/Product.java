@@ -21,6 +21,16 @@ public class Product {
 	private Double productPrice;
 
 	private Double productRating;
+	
+	
+
+	public Double getProductPrice() {
+		return productPrice;
+	}
+
+	public void setProductPrice(Double productPrice) {
+		this.productPrice = productPrice;
+	}
 
 	@OneToOne
 	@JoinColumn(name = "storeId")
