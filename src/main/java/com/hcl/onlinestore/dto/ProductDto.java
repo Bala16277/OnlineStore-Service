@@ -1,39 +1,20 @@
-package com.hcl.onlinestore.entity;
+package com.hcl.onlinestore.dto;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.OneToOne;
 
-@Entity
-public class Product {
+import com.hcl.onlinestore.entity.Store;
 
-	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
+public class ProductDto {
+
 	private Integer productId;
 
 	private String productName;
 
 	private String productDescription;
-	
-	private Double productPrice;
 
 	private Double productRating;
-	
-	
 
-	public Double getProductPrice() {
-		return productPrice;
-	}
-
-	public void setProductPrice(Double productPrice) {
-		this.productPrice = productPrice;
-	}
-
-	@OneToOne
-	@JoinColumn(name = "storeId")
 	private Store store;
 
 	public Integer getProductId() {
