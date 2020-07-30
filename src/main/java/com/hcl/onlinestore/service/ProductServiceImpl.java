@@ -33,7 +33,6 @@ import com.hcl.onlinestore.repository.UserRepository;
 @Service
 
 public class ProductServiceImpl implements ProductService {
-	
 
 	private static Logger logger = LoggerFactory.getLogger(ProductServiceImpl.class);
 
@@ -42,20 +41,18 @@ public class ProductServiceImpl implements ProductService {
 
 	@Autowired
 	UserRepository userRepository;
-	
+
 	@Autowired
 	OrderHistoryRepository orderHistoryRepository;
-	
+
 	@Autowired
 	ProductOrderRepository productOrderRepository;
-	
-	
 
 	public ProductResponseDto getProductsByProuctName(Integer userId, String productName)
 			throws ProductNotFoundException, UserNotFoundException {
 		ProductResponseDto productResponseDto = new ProductResponseDto();
 		List<ProductDto> productDtos = new ArrayList<>();
-		List<Product> productList = new ArrayList<>();
+		List<Product> productList;
 		Optional<List<Product>> products = productRepository.findByProductNameContains(productName);
 		Optional<User> users = userRepository.findByUserId(userId);
 		if (users.isPresent()) {
@@ -82,89 +79,82 @@ public class ProductServiceImpl implements ProductService {
 		}
 	}
 
-
-	
-	
-	
-	
-	
 	public OrderResDto placeOrder(int userId, List<ProductOrderDto> productList) {
 		double totalCost = 0.00;
 		OrderResDto orderResDto = new OrderResDto();
-		for(ProductOrderDto product : productList) {
+		for (ProductOrderDto product : productList) {
 			Optional<Product> products = productRepository.findByProductId(product.getProductId());
-			if(products.isPresent()) {
+			if (products.isPresent()) {
 				Product productDetails = products.get();
-				totalCost = totalCost + (productDetails.getProductPrice()* product.getQuantity());
-				
+				totalCost = totalCost + (productDetails.getProductPrice() * product.getQuantity());
+
 			}
 			logger.info("Total cost:  " + totalCost);
-			
+
 		}
-		
+
 		Optional<User> users = userRepository.findByUserId(userId);
-		if(users.isPresent()) {
-			
-		
-		User user = users.get();
-		logger.info("User is:  " + user.getUserName());
-		
-		OrderHistory orderHistory = new OrderHistory();
-		orderHistory.setTotalCost(totalCost);
-		orderHistory.setUser(user);
-		orderHistoryRepository.save(orderHistory);
-		
-		OrderHistory orderHistory1 = orderHistoryRepository.findTopByOrderByOrderHistoryIdDesc();
-		
-		for(ProductOrderDto product : productList) {
-			Optional<Product> products = productRepository.findByProductId(product.getProductId());
-			if(products.isPresent()) {
-				Product productDetails = products.get();
-				saveProductOrder(productDetails, product.getQuantity(),orderHistory1);
-				
+		if (users.isPresent()) {
+
+			User user = users.get();
+			logger.info("User is:  " + user.getUserName());
+
+			OrderHistory orderHistory = new OrderHistory();
+			orderHistory.setTotalCost(totalCost);
+			orderHistory.setUser(user);
+			orderHistoryRepository.save(orderHistory);
+
+			OrderHistory orderHistory1 = orderHistoryRepository.findTopByOrderByOrderHistoryIdDesc();
+
+			for (ProductOrderDto product : productList) {
+				Optional<Product> products = productRepository.findByProductId(product.getProductId());
+				if (products.isPresent()) {
+					Product productDetails = products.get();
+					saveProductOrder(productDetails, product.getQuantity(), orderHistory1);
+
+				}
 			}
-		}
-		logger.info("orderHistory id is:  " + orderHistory1.getOrderHistoryId());
-		
-		orderResDto.setMessage("Order placed successfully");
-		orderResDto.setStatusCode(HttpStatus.CREATED.value());
-		return orderResDto;
+			logger.info("orderHistory id is:  " + orderHistory1.getOrderHistoryId());
+
+			orderResDto.setMessage("Order placed successfully");
+			orderResDto.setStatusCode(HttpStatus.CREATED.value());
+			return orderResDto;
 		} else {
 			orderResDto.setMessage("user not found");
 			orderResDto.setStatusCode(HttpStatus.CREATED.value());
 			return orderResDto;
 		}
 	}
-	
-	private void saveProductOrder(Product product,int quantity, OrderHistory orderHistory) {
+
+	private void saveProductOrder(Product product, int quantity, OrderHistory orderHistory) {
 		ProductOrder productOrder = new ProductOrder();
 		productOrder.setProduct(product);
 		productOrder.setQuantity(quantity);
 		productOrder.setOrderHistory(orderHistory);
-		
-		productOrderRepository.save(productOrder); 
+
+		productOrderRepository.save(productOrder);
 	}
 
 	public List<OrderHistoryResDto> getOrderHistory(int userId) {
-	
+
 		List<OrderHistoryResDto> orderHistoryResDtos = new ArrayList<>();
-		
-		 Optional<User> users = userRepository.findByUserId(userId);
-		 if(users.isPresent()) {
-			 User user = users.get();
+
+		Optional<User> users = userRepository.findByUserId(userId);
+		if (users.isPresent()) {
+			User user = users.get();
 			List<OrderHistory> orderHistorys = orderHistoryRepository.findByUser(user);
-			
-			for(OrderHistory orderHistory: orderHistorys) {
-				OrderHistoryResDto OrderHistoryResDto = new OrderHistoryResDto();
-				OrderHistoryResDto.setOrderHistoryId(orderHistory.getOrderHistoryId());
-				OrderHistoryResDto.setTotalCost(orderHistory.getTotalCost());
-				
-				orderHistoryResDtos.add(OrderHistoryResDto);
+
+			for (OrderHistory orderHistory : orderHistorys) {
+				OrderHistoryResDto orderHistoryResDto = new OrderHistoryResDto();
+				orderHistoryResDto.setOrderHistoryId(orderHistory.getOrderHistoryId());
+				orderHistoryResDto.setTotalCost(orderHistory.getTotalCost());
+
+				orderHistoryResDtos.add(orderHistoryResDto);
 			}
-		
-		return orderHistoryResDtos;
-	} else {
-		return null;
-	}
+
+			return orderHistoryResDtos;
+		} else {
+			return orderHistoryResDtos;
+		}
 	}
 }
